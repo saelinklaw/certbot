@@ -31,7 +31,7 @@ if [ -z "$VENV_PATH" ]; then
 fi
 VENV_BIN="$VENV_PATH/bin"
 BOOTSTRAP_VERSION_PATH="$VENV_PATH/certbot-auto-bootstrap-version.txt"
-LE_AUTO_VERSION="1.9.0"
+LE_AUTO_VERSION="1.11.0"
 BASENAME=$(basename $0)
 USAGE="Usage: $BASENAME [OPTIONS]
 A self-updating wrapper script for the Certbot ACME client. When run, updates
@@ -799,15 +799,12 @@ BootstrapMageiaCommon() {
 # that function. If Bootstrap is set to a function that doesn't install any
 # packages BOOTSTRAP_VERSION is not set.
 if [ -f /etc/debian_version ]; then
-  Bootstrap() {
-    BootstrapMessage "Debian-based OSes"
-    BootstrapDebCommon
-  }
-  BOOTSTRAP_VERSION="BootstrapDebCommon $BOOTSTRAP_DEB_COMMON_VERSION"
+  DEPRECATED_OS=1
 elif [ -f /etc/mageia-release ]; then
   # Mageia has both /etc/mageia-release and /etc/redhat-release
   DEPRECATED_OS=1
 elif [ -f /etc/redhat-release ]; then
+  DEPRECATED_OS=1
   # Run DeterminePythonVersion to decide on the basis of available Python versions
   # whether to use 2.x or 3.x on RedHat-like systems.
   # Then, revert LE_PYTHON to its previous state.
@@ -840,12 +837,7 @@ elif [ -f /etc/redhat-release ]; then
       INTERACTIVE_BOOTSTRAP=1
     fi
 
-    Bootstrap() {
-      BootstrapMessage "Legacy RedHat-based OSes that will use Python3"
-      BootstrapRpmPython3Legacy
-    }
     USE_PYTHON_3=1
-    BOOTSTRAP_VERSION="BootstrapRpmPython3Legacy $BOOTSTRAP_RPM_PYTHON3_LEGACY_VERSION"
 
     # Try now to enable SCL rh-python36 for systems already bootstrapped
     # NB: EnablePython36SCL has been defined along with BootstrapRpmPython3Legacy in certbot-auto
@@ -864,18 +856,7 @@ elif [ -f /etc/redhat-release ]; then
     fi
 
     if [ "$RPM_USE_PYTHON_3" = 1 ]; then
-      Bootstrap() {
-        BootstrapMessage "RedHat-based OSes that will use Python3"
-        BootstrapRpmPython3
-      }
       USE_PYTHON_3=1
-      BOOTSTRAP_VERSION="BootstrapRpmPython3 $BOOTSTRAP_RPM_PYTHON3_VERSION"
-    else
-      Bootstrap() {
-        BootstrapMessage "RedHat-based OSes"
-        BootstrapRpmCommon
-      }
-      BOOTSTRAP_VERSION="BootstrapRpmCommon $BOOTSTRAP_RPM_COMMON_VERSION"
     fi
   fi
 
@@ -893,10 +874,7 @@ elif uname | grep -iq FreeBSD ; then
 elif uname | grep -iq Darwin ; then
   DEPRECATED_OS=1
 elif [ -f /etc/issue ] && grep -iq "Amazon Linux" /etc/issue ; then
-  Bootstrap() {
-    ExperimentalBootstrap "Amazon Linux" BootstrapRpmCommon
-  }
-  BOOTSTRAP_VERSION="BootstrapRpmCommon $BOOTSTRAP_RPM_COMMON_VERSION"
+  DEPRECATED_OS=1
 elif [ -f /etc/product ] && grep -q "Joyent Instance" /etc/product ; then
   DEPRECATED_OS=1
 else
@@ -1497,18 +1475,18 @@ letsencrypt==0.7.0 \
     --hash=sha256:105a5fb107e45bcd0722eb89696986dcf5f08a86a321d6aef25a0c7c63375ade \
     --hash=sha256:c36e532c486a7e92155ee09da54b436a3c420813ec1c590b98f635d924720de9
 
-certbot==1.9.0 \
-    --hash=sha256:d5a804d32e471050921f7b39ed9859e2e9de02824176ed78f57266222036b53a \
-    --hash=sha256:2ff9bf7d9af381c7efee22dec2dd6938d9d8fddcc9e11682b86e734164a30b57
-acme==1.9.0 \
-    --hash=sha256:d8061b396a22b21782c9b23ff9a945b23e50fca2573909a42f845e11d5658ac5 \
-    --hash=sha256:38a1630c98e144136c62eec4d2c545a1bdb1a3cd4eca82214be6b83a1f5a161f
-certbot-apache==1.9.0 \
-    --hash=sha256:09528a820d57e54984d490100644cd8a6603db97bf5776f86e95795ecfacf23d \
-    --hash=sha256:f47fb3f4a9bd927f4812121a0beefe56b163475a28f4db34c64dc838688d9e9e
-certbot-nginx==1.9.0 \
-    --hash=sha256:bb2e3f7fe17f071f350a3efa48571b8ef40a8e4b6db9c6da72539206a20b70be \
-    --hash=sha256:ab26a4f49d53b0e8bf0f903e58e2a840cda233fe1cbbc54c36ff17f973e57d65
+certbot==1.11.0 \
+    --hash=sha256:b7faa66c40a1ce5a31bfc8668d8feb5d2db6f7af9e791079a6d95c77b6593bf4 \
+    --hash=sha256:6b0ce04e55379aff0a47f873fa05c084538ad0f4a9b79f33108dbb0a7a668b43
+acme==1.11.0 \
+    --hash=sha256:77d6ce61b155315d7d7031489bbd245c0ea42c0453a04d4304393414e741a56d \
+    --hash=sha256:092eb09a074a935da4c10f66cb8634ffb2cc2d2cc1035d2998d608996efab924
+certbot-apache==1.11.0 \
+    --hash=sha256:ea7ac88733aad91a89c700289effda2a0c0658778da1ae2c54a0aefaee351285 \
+    --hash=sha256:3ed001427ec0b49324f2b9af7170fa6e6e88948fa51c3678b07bf17f8138863d
+certbot-nginx==1.11.0 \
+    --hash=sha256:79de69782a1199e577787ff9790dee02a44aac17dbecd6a7287593030842a306 \
+    --hash=sha256:9afe611f99a78b8898941b8ad7bdcf7f3c2b6e0fce27125268f7c713e64b34ee
 
 UNLIKELY_EOF
     # -------------------------------------------------------------------------
