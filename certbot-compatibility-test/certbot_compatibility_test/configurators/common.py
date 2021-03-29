@@ -11,7 +11,7 @@ from certbot_compatibility_test import util
 logger = logging.getLogger(__name__)
 
 
-class Proxy(object):
+class Proxy:
     """A common base for compatibility test configurators"""
 
     @classmethod
@@ -69,11 +69,10 @@ class Proxy(object):
         shutil.copy(cert_path, cert)
         key = os.path.join(cert_and_key_dir, "key")
         shutil.copy(key_path, key)
+        chain = None
         if chain_path:
             chain = os.path.join(cert_and_key_dir, "chain")
             shutil.copy(chain_path, chain)
-        else:
-            chain = None
 
         return cert, key, chain
 

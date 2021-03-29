@@ -1,4 +1,6 @@
 """Tests for AugeasParserNode classes"""
+from typing import List
+
 try:
     import mock
 except ImportError: # pragma: no cover
@@ -107,7 +109,7 @@ class AugeasParserNodeTest(util.ApacheTest):  # pylint: disable=too-many-public-
 
     def test_set_parameters(self):
         servernames = self.config.parser_root.find_directives("servername")
-        names = []  # type: List[str]
+        names: List[str] = []
         for servername in servernames:
             names += servername.parameters
         self.assertFalse("going_to_set_this" in names)
